@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace HW1_62538_TeodoraPetkova {
+namespace HW1_62538_TeodoraPetkova
+{
+
 
     public class Board
     {
@@ -11,9 +14,14 @@ namespace HW1_62538_TeodoraPetkova {
         private int n;
         private string move;
 
-        public Board(int[,] tiles, int N, int inpNullTile, string move="")
+        public string Move
         {
-            board = tiles;
+            get { return move; }
+        }
+
+        public Board(int[,] tiles, int N, int inpNullTile, string move = "")
+        {
+
             if (inpNullTile == -1)
             {
                 nullTile = N;
@@ -23,17 +31,19 @@ namespace HW1_62538_TeodoraPetkova {
                 nullTile = inpNullTile;
             }
             n = (int)Math.Sqrt(N + 1);
+            board = new int[n, n];
+            board = getTilesCopy(tiles);
             this.move = move;
-            // Console.WriteLine(goal);
+            //Console.WriteLine(this);
         }
         public override string ToString()
         {
             string result = "";
-            for (int i = 0;i < board.GetLength(0); i++)
+            for (int i = 0; i < board.GetLength(0); i++)
             {
                 for (int j = 0; j < board.GetLength(1); j++)
                 {
-                    result += board[i,j].ToString()+" ";
+                    result += board[i, j].ToString() + " ";
                 }
                 result += "\n";
             }
@@ -43,12 +53,6 @@ namespace HW1_62538_TeodoraPetkova {
         {
             return board[row, col];
         }
-        public int TileAt(int index)
-        {
-            int row = index / n;
-            int col = index % n;
-            return board[row,col];
-        }
         public int Size()
         {
             return n;
@@ -56,22 +60,25 @@ namespace HW1_62538_TeodoraPetkova {
         public int Manhattan()
         {
             int dist = 0;
-            for(int i = 0;i<n;i++)
+            for (int i = 0; i < n; i++)
             {
-                for(int j = 0; j < n; j++)
+                for (int j = 0; j < n; j++)
                 {
-                    int row = board[i, j] / n;
-                    int col= board[i, j] % n;
-                    dist += Math.Abs(row - i) + Math.Abs(col - j);
+                    if (board[i, j] != 0)
+                    {
+                        int row = (board[i, j] - 1) / n;
+                        int col = (board[i, j] - 1) % n;
+                        dist += Math.Abs(row - i) + Math.Abs(col - j);
+                    }
                 }
             }
             return dist;
         }
         public bool IsGoal()
         {
-            string goal="";
+            string goal = "";
             int ind = 1;
-            for (int i = 0; i < n*n + 1; i++)
+            for (int i = 0; i < n * n; i++)
             {
                 if (i == nullTile)
                 {
@@ -87,58 +94,104 @@ namespace HW1_62538_TeodoraPetkova {
                     goal += "\n";
                 }
             }
-            return this.ToString()==goal;
+            // Console.WriteLine("GOAL:\n" + goal);
+            return this.ToString() == goal;
         }
         public bool Equals(Board y)
         {
             return y.ToString() == this.ToString();
         }
+
+        int[,] getTilesCopy(int[,] a)
+        {
+            int[,] b = new int[n, n];
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    b[i, j] = a[i, j];
+                }
+            }
+            return b;
+        }
         public List<Board> Neighbors()
         {
             List<Board> list = new List<Board>();
-            int row = nullTile / n;
-            int col = nullTile % n;
-            if(row+1 != n)
+            int currentNull = 0;
+            bool flag = false;
+            for (int i = 0; i < n; i++)
             {
-                int[,] newBoard = board;
-                int temp = board[row+1, col];
-                board[row, col]=temp;
-                board[row+1, col]=0;
-                list.Add(new Board(newBoard, n * n, (n * (row+1) + col), "up"));
+                for (int j = 0; j < n; j++)
+                {
+                    if (board[i, j] == 0)
+                    {
+                        flag = true;
+                        break;
+                    }
+                    currentNull++;
+                }
+                if (flag)
+                {
+                    break;
+                }
+            }
+            int row = currentNull / n;
+            int col = currentNull % n;
+            //Console.WriteLine($"Current Null: {currentNull} on [{row},{col}]");
+            if (row + 1 != n)
+            {
+                int[,] newBoard = new int[n, n];
+                newBoard = getTilesCopy(board);
+
+                int temp = board[row + 1, col];
+                newBoard[row, col] = temp;
+                newBoard[row + 1, col] = 0;
+                Board tempBoard = new Board(newBoard, n * n, nullTile, "up");
+                list.Add(tempBoard);
+                //Console.WriteLine("UP:\n" + tempBoard);
             }
             if (row - 1 != -1)
             {
-                int[,] newBoard = board;
+                int[,] newBoard = new int[n, n];
+                newBoard = getTilesCopy(board);
                 int temp = board[row - 1, col];
-                board[row, col] = temp;
-                board[row - 1, col] = 0;
-                list.Add(new Board(newBoard, n * n, (n * (row-1) + col), "down"));
+                newBoard[row, col] = temp;
+                newBoard[row - 1, col] = 0;
+                Board tempBoard = new Board(newBoard, n * n, nullTile, "down");
+                list.Add(tempBoard);
+                // Console.WriteLine("DOWN:\n" + tempBoard);
             }
-            if (col+1 != n)
+            if (col + 1 != n)
             {
-                int[,] newBoard = board;
-                int temp = board[row, col+1];
-                board[row, col] = temp;
-                board[row, col+1] = 0;
-                list.Add(new Board(newBoard, n * n, (n * row + (col+1)), "left"));
+                int[,] newBoard = new int[n, n];
+                newBoard = getTilesCopy(board);
+                int temp = board[row, col + 1];
+                newBoard[row, col] = temp;
+                newBoard[row, col + 1] = 0;
+                Board tempBoard = new Board(newBoard, n * n, nullTile, "left");
+                list.Add(tempBoard);
+                //Console.WriteLine("LEFT: \n" + tempBoard);
             }
             if (col - 1 != -1)
             {
-                int[,] newBoard = board;
-                int temp = board[row, col-1];
-                board[row, col] = temp;
-                board[row, col-1] = 0;
-                list.Add(new Board(newBoard, n * n, (n * row + (col-1)), "right"));
+                int[,] newBoard = new int[n, n];
+                newBoard = getTilesCopy(board);
+                int temp = board[row, col - 1];
+                newBoard[row, col] = temp;
+                newBoard[row, col - 1] = 0;
+                Board tempBoard = new Board(newBoard, n * n, nullTile, "right");
+                list.Add(tempBoard);
+                //Console.WriteLine("RIGHT:\n" + tempBoard);
             }
             return list;
         }
         public bool isSolvable()
         {
             int count = 0;
-            int[] temp= board.Cast<int>().ToArray();
-            for (int i = 0; i < n*n-1; i++)
+            int[] temp = board.Cast<int>().ToArray();
+            for (int i = 0; i < n * n - 1; i++)
             {
-                for(int j = i+1;j < n*n; j++)
+                for (int j = i + 1; j < n * n; j++)
                 {
                     if (temp[i] > temp[j] && temp[i] != 0 && temp[j] != 0)
                     {
@@ -147,7 +200,114 @@ namespace HW1_62538_TeodoraPetkova {
                 }
             }
 
-            return ((count % 2 + 1) % 2)==1;
+            return ((count % 2 + 1) % 2) == 1;
+        }
+    }
+
+    public class Node
+    {
+        private Board board;
+        private int dist, moves;
+        private Node prev;
+
+        public Node(Board board, int moves, Node prev)
+        {
+            this.board = board;
+            this.dist = board.Manhattan();
+            this.moves = moves;
+            this.prev = prev;
+        }
+
+        public int Dist
+        {
+            get { return dist; }
+        }
+        public int Moves
+        {
+            get { return moves; }
+        }
+        public Board Board { get { return board; } }
+        public Node Prev { get { return prev; } }
+    }
+
+    public class NodeQueueCompearer : IComparer<Node>
+    {
+        public int Compare(Node x, Node y)
+        {
+            return x.Moves + x.Dist - y.Moves - y.Dist;
+        }
+    }
+
+    public class Solver
+    {
+        private System.Collections.Generic.PriorityQueue<Node, Node> priorityQueue = new System.Collections.Generic.PriorityQueue<Node, Node>(new NodeQueueCompearer());
+        private int minMoves = -1;
+        private Node bestestOne;
+
+        public Solver(Board startBoard)
+        {
+            if (startBoard == null)
+            {
+                Console.WriteLine(-1);
+                return;
+            }
+            Node newNode = new Node(startBoard, 0, null);
+            priorityQueue.Enqueue(newNode, newNode);
+
+            while (priorityQueue.Count > 0)
+            {
+                Node current = priorityQueue.Dequeue();
+                //Console.WriteLine(current.Board + "\n_______________________________________");
+                if (current.Board.IsGoal())
+                {
+                    if (minMoves == -1 || current.Moves < minMoves)
+                    {
+                        minMoves = current.Moves;
+                        bestestOne = current;
+                    }
+                }
+
+                if (minMoves == -1 || current.Moves + current.Moves < minMoves)
+                {
+                    List<Board> versions = current.Board.Neighbors();
+                    foreach (Board b in versions)
+                    {
+                        if (current.Prev == null || !b.Equals(current.Prev.Board))
+                        {
+                            newNode = new Node(b, current.Moves + 1, current);
+                            priorityQueue.Enqueue(newNode, newNode);
+                        }
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        public int Moves
+        {
+            get { return minMoves; }
+        }
+        public void Path()
+        {
+            Stack<Node> stack = new Stack<Node>();
+            stack.Push(bestestOne);
+            Node current = bestestOne;
+            while (current.Prev != null)
+            {
+                current = current.Prev;
+                stack.Push(current);
+            }
+            while (stack.Count > 0)
+            {
+                Node output = stack.Pop();
+                if (output.Board.Move != "")
+                {
+                    Console.WriteLine(output.Board.Move);
+                }
+            }
         }
     }
 
@@ -155,11 +315,12 @@ namespace HW1_62538_TeodoraPetkova {
     {
         static void Main(string[] args)
         {
+
             //reading input
-            int N= Convert.ToInt32(Console.ReadLine());
-            int inpNullTile=Convert.ToInt32(Console.ReadLine());
+            int N = Convert.ToInt32(Console.ReadLine());
+            int inpNullTile = Convert.ToInt32(Console.ReadLine());
             //geting size NxN
-            int size=(int)Math.Sqrt(N+1);
+            int size = (int)Math.Sqrt(N + 1);
             //board
             int[,] inputBoard = new int[size, size];
             for (int i = 0; i < size; i++)
@@ -170,12 +331,33 @@ namespace HW1_62538_TeodoraPetkova {
                     inputBoard[i, j] = int.Parse(values[j]);
                 }
             }
-
+            //Start stopwatch
+            //Stopwatch stopWatch = new Stopwatch();
+            //stopWatch.Start();
             //creating board
-            Board board = new Board(inputBoard, 8, inpNullTile);
+            Board board = new Board(inputBoard, N, inpNullTile);
             //Console.WriteLine("_______________________________");
-            Console.WriteLine(board);
-            Console.WriteLine(board.isSolvable());
+            if (board.isSolvable())
+            {
+
+                //board.Neighbors();
+
+                Solver solver = new Solver(board);
+                //Stop Stopwatch
+                // stopWatch.Stop();
+
+                Console.WriteLine(solver.Moves);
+                solver.Path();
+                //Print time
+                //TimeSpan ts = stopWatch.Elapsed;
+                // string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                //         ts.Milliseconds / 10);
+                //Console.WriteLine("RunTime: " + elapsedTime);
+            }
+            else
+            {
+                Console.WriteLine(-1);
+            }
         }
     }
 
