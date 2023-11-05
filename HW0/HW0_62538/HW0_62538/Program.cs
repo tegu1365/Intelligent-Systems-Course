@@ -76,18 +76,17 @@ namespace HW0_62538
         }
 
 
-        static List<string> visited = new List<string>();
+        static List<JumpingFrogs> visited = new List<JumpingFrogs>();
         static bool AlreadyVisited(JumpingFrogs jumpingFrog)
         {
-           // foreach (var frogy in visited)
-            //{
-            //    if (jumpingFrog.Equal(frogy))
-            //    {
-            //        return true;
-            //    }
-           // }
-            return visited.Contains(jumpingFrog.Frogs);
-           // return false;
+            foreach (var frogy in visited)
+            {
+                if (jumpingFrog.Equal(frogy))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         static Stack<JumpingFrogs> stack = new Stack<JumpingFrogs>();
@@ -98,21 +97,22 @@ namespace HW0_62538
                 stack.Push(current);
                 return true;
             }
+            //posible optimisation: generate fewer posibilities (if already visited do not generate)
             List<JumpingFrogs> posibleMoves = current.GeneratePosibleMoves();
             foreach (var move in posibleMoves)
             {
                 if (DFS(move, end) && !AlreadyVisited(move))
                 {
                     stack.Push(move);
-                    visited.Add(move.Frogs);
+                    visited.Add(move);
                     return true;
                 }
             }
             return false;
         }
         //exponential time 
-        // 0.59s for N=15
-        // 17.40s for N=20
+        // 0.7s for N=15
+        // 4.5s for N=17
         static void Main(string[] args)
         {
             //JumpingFrogs frogs=new JumpingFrogs(">>_<<");
@@ -122,30 +122,32 @@ namespace HW0_62538
 
             int N = Convert.ToInt32(Console.ReadLine());
 
-           
+            //Start stopwatch
+            //Stopwatch stopWatch = new Stopwatch();
+            //stopWatch.Start();
 
             JumpingFrogs start = new JumpingFrogs(new string('>', N) + "_" + new string('<', N));
             JumpingFrogs end = new JumpingFrogs(new string('<', N) + "_" + new string('>', N));
             //Console.WriteLine(start+"\n"+end);
 
-            //Start stopwatch
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-
             if (DFS(start, end))
             {
                 //Stop Stopwatch
-                stopWatch.Stop();
+                //stopWatch.Stop();
                 Console.WriteLine(start);
                 while (stack.Count > 1)
                 {
                     Console.WriteLine(stack.Pop().Frogs);
                 }
                 // Print time
-                TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
-                       ts.Milliseconds / 10);
-                Console.WriteLine("RunTime: " + elapsedTime);
+                //TimeSpan ts = stopWatch.Elapsed;
+                //string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                //        ts.Milliseconds / 10);
+                //Console.WriteLine("RunTime: " + elapsedTime);
+            }
+            else
+            {
+                Console.WriteLine(-1);
             }
         }
     }
