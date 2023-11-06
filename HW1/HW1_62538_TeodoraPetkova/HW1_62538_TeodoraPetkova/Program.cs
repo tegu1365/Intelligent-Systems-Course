@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace HW1_62538_TeodoraPetkova
 {
@@ -138,6 +139,8 @@ namespace HW1_62538_TeodoraPetkova
             int row = currentNull / n;
             int col = currentNull % n;
             //Console.WriteLine($"Current Null: {currentNull} on [{row},{col}]");
+            
+            //the movements are like in the examples opposit of the 0 element move
             if (row + 1 != n)
             {
                 int[,] newBoard = new int[n, n];
@@ -234,17 +237,17 @@ namespace HW1_62538_TeodoraPetkova
     {
         public int Compare(Node x, Node y)
         {
-            return x.Moves + x.Dist - y.Moves - y.Dist;
+            return (x.Moves + x.Dist) - (y.Moves + y.Dist);
         }
     }
 
-    public class Solver
+    public class SolverAStar
     {
         private System.Collections.Generic.PriorityQueue<Node, Node> priorityQueue = new System.Collections.Generic.PriorityQueue<Node, Node>(new NodeQueueCompearer());
         private int minMoves = -1;
         private Node bestestOne;
 
-        public Solver(Board startBoard)
+        public SolverAStar(Board startBoard)
         {
             if (startBoard == null)
             {
@@ -311,6 +314,94 @@ namespace HW1_62538_TeodoraPetkova
         }
     }
 
+    public class SolverIDA
+    {
+        private int minMoves = -1;
+        private Node bestestOne;
+
+        public SolverIDA(Board startBoard)
+        {
+            minMoves = IDAStar(new Node(startBoard, 0, null));
+        }
+        public int Moves
+        {
+            get { return minMoves; }
+        }
+        public int IDAStar(Node current)
+        {
+            if (current == null) return -1;
+            int threshold = current.Dist;
+
+            while (true)
+            {
+                int dist = IDA(current, threshold);
+                if (dist == int.MaxValue)
+                {
+                    return -1;
+                }
+                else
+                {
+                    if(dist<0){
+                        //minMoves = current.Moves;
+                        return -dist;
+                    }
+                    else
+                    {
+                        threshold = dist;
+                    }
+                }
+            }
+        }
+        public int IDA(Node current, int threshold)
+        {
+            if (current.Board.IsGoal())
+            {
+                bestestOne = current;
+                return -current.Moves;
+            }
+
+            int estimate = current.Moves + current.Dist;
+            if (estimate > threshold)
+            {
+                return estimate;
+            }
+            int min = int.MaxValue;
+            List<Board> versions = current.Board.Neighbors();
+            foreach (Board b in versions)
+            {
+                int t = IDA(new Node(b, current.Moves + 1, current), threshold);
+                if (t < 0)
+                {
+                    return t;
+                }
+                else if (t < min)
+                {
+                    min = t;
+                }
+            }
+            return min;
+        }
+        public void Path()
+        {
+            Stack<Node> stack = new Stack<Node>();
+            stack.Push(bestestOne);
+            Node current = bestestOne;
+            while (current.Prev != null)
+            {
+                current = current.Prev;
+                stack.Push(current);
+            }
+            while (stack.Count > 0)
+            {
+                Node output = stack.Pop();
+                if (output.Board.Move != "")
+                {
+                    Console.WriteLine(output.Board.Move);
+                }
+            }
+        }
+    }
+
     internal class Program
     {
         static void Main(string[] args)
@@ -323,6 +414,10 @@ namespace HW1_62538_TeodoraPetkova
             int size = (int)Math.Sqrt(N + 1);
             //board
             int[,] inputBoard = new int[size, size];
+            //Input needs to be like in the exmples 
+            // N
+            // nullTile in the end
+            // N numbers for N rows
             for (int i = 0; i < size; i++)
             {
                 var values = (Console.ReadLine().Split(' '));
@@ -342,7 +437,7 @@ namespace HW1_62538_TeodoraPetkova
 
                 //board.Neighbors();
 
-                Solver solver = new Solver(board);
+                SolverIDA solver = new SolverIDA(board);
                 //Stop Stopwatch
                 // stopWatch.Stop();
 
