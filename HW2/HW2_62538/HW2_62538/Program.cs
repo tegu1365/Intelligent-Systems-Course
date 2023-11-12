@@ -1,4 +1,6 @@
-﻿namespace HW2_62538
+﻿using System.Diagnostics;
+
+namespace HW2_62538
 {
     class NQueens
     {
@@ -243,13 +245,17 @@
             {
                 flag = true;
             }
-            if(col.Count == 1)
+            if (col != null)
             {
-                return col[0];
+                if (col.Count <= 1)
+                {
+                    return col[0];
+                }
+                Random rnd = new Random();
+                int index = rnd.Next(0, col.Count);
+                return col[index];
             }
-            Random rnd= new Random();
-            int index=rnd.Next(0,col.Count);
-            return col[index];
+            return -1;
         }
 
         internal int getRowWithMinConflict(int col)
@@ -343,7 +349,7 @@
 
     internal class Program
     {
-        static int k = (int) Math.Pow(10, 6);
+        static int k = (int) Math.Pow(10, 6);//1 000 000
         //NQueen too random can have infinit loop
         static void FirstTypeSolving(int N)
         {
@@ -376,18 +382,18 @@
             // queens.PrintBoard();
             queens.PrintNums();
         }
-
+        static Queens queens;
         //1D array type of solving
         static void OneDArraySolving(int N)
         {
-            Queens queens = new Queens(N);
+            queens = new Queens(N);
             queens.InitQueens();
             int iter = 0;
             while (iter++ <= k * N)
             {
                 int col = queens.ColWithMaxConflict();
                 int row = queens.getRowWithMinConflict(col);
-                //Console.WriteLine(col+": "+row);
+                //Console.WriteLine(iter+" | "+col+": "+row);
                 queens.Move(col,row);
                 if (queens.Flag)
                 {
@@ -401,22 +407,45 @@
             }
             else
             {
-                //queens.PrintBoard();
-                Console.WriteLine(queens);
+                return;
+               
             }
         }
 
         static void Main(String[] args)
         {
             int N = Convert.ToInt32(Console.ReadLine());
-            if (N==2||N==3)
+            if (N == 1)
+            {
+                //Console.WriteLine("*");
+                //Console.WriteLine("[0]");
+            }
+            if (N==0||N==2||N==3)
             {
                 Console.WriteLine(-1);
             }
             else
             {
-                //may be backtrack somewhere...
+
+                //Start stopwatch
+                //Stopwatch stopWatch = new Stopwatch();
+                //stopWatch.Start();
+
+                //may be backtrack somewhere...to get faster
+                //for the moment is still too inconsistent
                 OneDArraySolving(N);
+                //Stop Stopwatch
+                //stopWatch.Stop();
+
+
+                //queens.PrintBoard();
+                Console.WriteLine(queens);
+
+                //Print time
+                //TimeSpan ts = stopWatch.Elapsed;
+                //string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                //        ts.Milliseconds / 10);
+                //Console.WriteLine("RunTime: " + elapsedTime);
             }
         }
     }
