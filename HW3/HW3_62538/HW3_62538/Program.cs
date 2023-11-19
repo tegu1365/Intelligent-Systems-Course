@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Security.AccessControl;
 
 namespace HW3_62538
 {
@@ -6,11 +7,13 @@ namespace HW3_62538
     {
         static List<(int Index, int Weight, int Value)> items = new List<(int Index, int Weight, int Value)>();
         static int maxBackpack, numberOfItems;
-        const double MUTATION_RATE = 0.8;
-        const int MAX_GENERATIONS_WITHOUT_NEW_BEST = 100;
+        const double MUTATION_RATE = 0.45;
+        const int MAX_GENERATIONS_WITHOUT_NEW_BEST = 500;
+        const int MAX_GENERATIONS_REPEATS = 400;
         static int sizeOfPopulation = 150;
-        static List<(List<Backpack> Population, int max)> generations = new List<(List<Backpack> Population, int max)>();
+        //static List<(List<Backpack> Population, int max)> generations = new List<(List<Backpack> Population, int max)>();
         static Random rnd = new Random();
+        static List<int> gens=new List<int>();
 
         public class Backpack
         {
@@ -156,7 +159,7 @@ namespace HW3_62538
             int[] bits = new int[numberOfItems];
             int N = numberOfItems / 2;
             int a, b;
-
+            k = k % 2;
             if (k == 0)
             {
                 a = 0;
@@ -204,7 +207,7 @@ namespace HW3_62538
             }
         }
 
-        //Maybe more children per Gen
+        //Maybe more children per Gen need more new variations
         static List<Backpack> NextGeneration(List<Backpack> population)
         {
             List<Backpack> nextGen = new List<Backpack>();
@@ -224,21 +227,25 @@ namespace HW3_62538
             }
             return nextGen;
         }
+        
         static int Solve()
         {
             List<Backpack> population = new List<Backpack>();
             population = Init(sizeOfPopulation);
 
             int currentMax = MaxInPopulation(population);
-            generations.Add((population, currentMax));
+            //generations.Add((population, currentMax));
+            
             int prevNum = MaxInPopulation(population);
             int numberOfGensWithoutNewBest = 0;
+            int repeatingNumber = 0;
             while (true)
             {
                 population = NextGeneration(population);
 
                 int _max = MaxInPopulation(population);
-                generations.Add((population, _max));
+                //generations.Add((population, _max));
+                gens.Add(_max);
                 if (currentMax < _max)
                 {
                     currentMax = _max;
@@ -252,8 +259,25 @@ namespace HW3_62538
                 {
                     break;
                 }
+
+                if (_max == prevNum)
+                {
+                    repeatingNumber++;
+                }
+                else
+                {
+                    repeatingNumber = 0;
+                }
+                if (repeatingNumber > MAX_GENERATIONS_REPEATS)
+                { 
+                    break;
+                }
                 prevNum = _max;
             }
+            //if (currentMax == 0)
+            //{
+            //    return Solve();
+            //}
             return currentMax;
         }
 
@@ -268,36 +292,78 @@ namespace HW3_62538
                 items.Add((i, int.Parse(input[0]), int.Parse(input[1])));
             }
 
-            int _max = Solve();
+            var minItem = items.MinBy(x => x.Weight);
+            if (minItem.Weight > maxBackpack)
+            {
+                Console.WriteLine(-1);
+            }
+            else
+            {
+                //Start stopwatch
+                //Stopwatch stopWatch = new Stopwatch();
+                //stopWatch.Start();
+                int _max = Solve();
+                //Stop Stopwatch
+                //stopWatch.Stop();
+                PrintGenerations();
 
-            PrintGenerations();
-
-            Console.WriteLine($"ANSWARE:{_max}");
+                //Console.WriteLine($"ANSWARE:{_max}");
+                Console.WriteLine($"{_max}");
+                //Print time
+                //TimeSpan ts = stopWatch.Elapsed;
+                //string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                //        ts.Milliseconds / 10);
+                //Console.WriteLine("RunTime: " + elapsedTime);
+            }
         }
 
         private static void PrintGenerations()
         {
 
-            if (generations.Count > 10)
+            //if (generations.Count > 10)
+            //{
+            //    Console.WriteLine("Gen0:" + generations[0].max);
+            //    int N = (generations.Count - 1) / 8;
+            //    for (int i = 0; i < 8; i++)
+            //    {
+            //        int k = i * N;
+            //        Console.WriteLine($"Generation {k}: ");
+            //        Console.WriteLine(generations[k].max);
+            //        PrintPopulation(generations[k].Population);
+            //    }
+            //    Console.WriteLine($"Last Gen {generations.Count}:" + generations[generations.Count - 1].max);
+            //}
+            //else
+            //{
+            //    for (int i = 0; i < generations.Count; i++)
+            //    {
+            //        Console.WriteLine($"Generation {i}: ");
+            //        Console.WriteLine(generations[i].max);
+            //        PrintPopulation(generations[i].Population);
+            //    }
+            //}
+
+            if (gens.Count > 10)
             {
-                Console.WriteLine("Gen0:" + generations[0].max);
-                int N = (generations.Count - 1) / 8;
+                //Console.WriteLine("Gen0:" + gens[0]);
+                Console.WriteLine(gens[0]);
+                int N = (gens.Count - 1) / 8;
                 for (int i = 0; i < 8; i++)
                 {
                     int k = i * N;
-                    Console.WriteLine($"Generation {k}: ");
-                    Console.WriteLine(generations[k].max);
-                    PrintPopulation(generations[k].Population);
+                    //Console.WriteLine($"Generation {k}: ");
+                    Console.WriteLine(gens[k]);
                 }
-                Console.WriteLine("Last Gen:" + generations[generations.Count - 1].max);
+                //Console.WriteLine($"Last Gen {gens.Count}:" + gens[gens.Count - 1]);
+                Console.WriteLine(gens[gens.Count - 1]);
+
             }
             else
             {
-                for (int i = 0; i < generations.Count; i++)
+                for (int i = 0; i < gens.Count; i++)
                 {
-                    Console.WriteLine($"Generation {i}: ");
-                    Console.WriteLine(generations[i].max);
-                    PrintPopulation(generations[i].Population);
+                    //Console.WriteLine($"Generation {i}: ");
+                    Console.WriteLine(gens[i]);
                 }
             }
 
