@@ -171,7 +171,6 @@ namespace HW2_62538
             Console.Write("]");
         }
     }
-
     class Queens
     {
         int n;
@@ -180,6 +179,8 @@ namespace HW2_62538
         int[] queensD1;//main
         int[] queensD2;//secondery
         bool flag = false;
+        Random rnd = new Random();
+
 
         public Queens(int n)
         {
@@ -251,7 +252,6 @@ namespace HW2_62538
                 {
                     return col[0];
                 }
-                Random rnd = new Random();
                 int index = rnd.Next(0, col.Count);
                 return col[index];
             }
@@ -281,7 +281,6 @@ namespace HW2_62538
             {
                 return row[0];
             }
-            Random rnd = new Random();
             int index = rnd.Next(0, row.Count);
             return row[index];
         }
@@ -389,7 +388,7 @@ namespace HW2_62538
             queens = new Queens(N);
             queens.InitQueens();
             int iter = 0;
-            while (iter++ <= k * N)
+            while (iter++ <= N*2)
             {
                 int col = queens.ColWithMaxConflict();
                 int row = queens.getRowWithMinConflict(col);
@@ -428,24 +427,24 @@ namespace HW2_62538
             {
 
                 //Start stopwatch
-                //Stopwatch stopWatch = new Stopwatch();
-                //stopWatch.Start();
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
 
                 //may be backtrack somewhere...to get faster
                 //for the moment is still too inconsistent
                 OneDArraySolving(N);
                 //Stop Stopwatch
-                //stopWatch.Stop();
+                stopWatch.Stop();
 
 
-                //queens.PrintBoard();
+                queens.PrintBoard();
                 Console.WriteLine(queens);
 
                 //Print time
-                //TimeSpan ts = stopWatch.Elapsed;
-                //string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
-                //        ts.Milliseconds / 10);
-                //Console.WriteLine("RunTime: " + elapsedTime);
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                        ts.Milliseconds / 10);
+                Console.WriteLine("RunTime: " + elapsedTime);
             }
         }
     }

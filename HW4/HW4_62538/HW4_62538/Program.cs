@@ -53,7 +53,7 @@ namespace HW4_62538
                     }
                 }
 
-                char result = CheckGameResult();
+                char result = CheckGameResult(board);
                 if (result != ' ')
                 {
                     PrintBoard();
@@ -90,7 +90,7 @@ namespace HW4_62538
             int row, col;
             do
             {
-                Console.Write("Enter your move (row and column, separated by space): ");
+                Console.Write("Enter your move (row and column (starts from 1), separated by space): ");
                 string[] input = Console.ReadLine().Split();
                 row = int.Parse(input[0]) - 1;
                 col = int.Parse(input[1]) - 1;
@@ -110,6 +110,12 @@ namespace HW4_62538
         {
             int bestVal = int.MinValue;
             (int, int) bestMove = (-1, -1);
+
+            (int winRow, int winCol) = FindImmediateWin();
+            if (winRow != -1 && winCol != -1)
+            {
+                return (winRow, winCol);
+            }
 
             for (int i = 0; i < 3; i++)
             {
@@ -133,15 +139,41 @@ namespace HW4_62538
             return bestMove;
         }
 
+        static (int, int) FindImmediateWin()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (board[i, j] == ' ')
+                    {
+                        board[i, j] = computerChar;
+                        if (CheckGameResult(board) == computerChar)
+                        {
+                            board[i, j] = ' ';
+                            return (i, j); 
+                        }
+                        board[i, j] = ' ';
+                    }
+                }
+            }
+            return (-1, -1);
+        }
+
         static int Minimax(char[,] board, int depth, bool isMaximizing, int alpha, int beta)
         {
-            char result = CheckGameResult();
+            char result = CheckGameResult(board);
             if (result != ' ')
             {
                 if (result == playerChar) return -1;
                 else if (result == computerChar) return 1;
                 else return 0;
             }
+
+            //if (depth >= 4)//tried it makes wrong desisions
+            //{
+            //    return 0;
+            //}
 
             if (isMaximizing)
             {
@@ -155,6 +187,7 @@ namespace HW4_62538
                             board[i, j] = computerChar;
                             int eval = Minimax(board, depth + 1, false, alpha, beta);
                             board[i, j] = ' ';
+                            //eval-=depth;//tried this didn't work made the algo worse
                             maxEval = Math.Max(maxEval, eval);
                             alpha = Math.Max(alpha, eval);
                             if (beta <= alpha) break;
@@ -175,6 +208,7 @@ namespace HW4_62538
                             board[i, j] = playerChar;
                             int eval = Minimax(board, depth + 1, true, alpha, beta);
                             board[i, j] = ' ';
+                            //eval+= depth;
                             minEval = Math.Min(minEval, eval);
                             beta = Math.Min(beta, eval);
                             if (beta <= alpha) break;
@@ -185,7 +219,7 @@ namespace HW4_62538
             }
         }
 
-        static char CheckGameResult()
+        static char CheckGameResult(char[,] board)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -221,7 +255,7 @@ namespace HW4_62538
                 }
             }
 
-            return 'D'; // Draw
+            return 'D';
         }
 
         static void SwitchPlayer()
