@@ -123,8 +123,8 @@ namespace HW0_62538
             int N = Convert.ToInt32(Console.ReadLine());
 
             //Start stopwatch
-            //Stopwatch stopWatch = new Stopwatch();
-            //stopWatch.Start();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
 
             JumpingFrogs start = new JumpingFrogs(new string('>', N) + "_" + new string('<', N));
             JumpingFrogs end = new JumpingFrogs(new string('<', N) + "_" + new string('>', N));
@@ -133,17 +133,17 @@ namespace HW0_62538
             if (DFS(start, end))
             {
                 //Stop Stopwatch
-                //stopWatch.Stop();
+                stopWatch.Stop();
                 Console.WriteLine(start);
                 while (stack.Count > 1)
                 {
                     Console.WriteLine(stack.Pop().Frogs);
                 }
                 // Print time
-                //TimeSpan ts = stopWatch.Elapsed;
-                //string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
-                //        ts.Milliseconds / 10);
-                //Console.WriteLine("RunTime: " + elapsedTime);
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                        ts.Milliseconds / 10);
+                Console.WriteLine("RunTime: " + elapsedTime);
             }
             else
             {

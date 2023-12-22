@@ -411,41 +411,41 @@ namespace HW2_62538
             }
         }
 
-        static void Main(String[] args)
-        {
-            int N = Convert.ToInt32(Console.ReadLine());
-            if (N == 1)
-            {
-                //Console.WriteLine("*");
-                //Console.WriteLine("[0]");
-            }
-            if (N==0||N==2||N==3)
-            {
-                Console.WriteLine(-1);
-            }
-            else
-            {
+        //static void Main(String[] args)
+        //{
+        //    int N = Convert.ToInt32(Console.ReadLine());
+        //    if (N == 1)
+        //    {
+        //        //Console.WriteLine("*");
+        //        //Console.WriteLine("[0]");
+        //    }
+        //    if (N==0||N==2||N==3)
+        //    {
+        //        Console.WriteLine(-1);
+        //    }
+        //    else
+        //    {
 
-                //Start stopwatch
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
+        //        //Start stopwatch
+        //        Stopwatch stopWatch = new Stopwatch();
+        //        stopWatch.Start();
 
-                //may be backtrack somewhere...to get faster
-                //for the moment is still too inconsistent
-                OneDArraySolving(N);
-                //Stop Stopwatch
-                stopWatch.Stop();
+        //        //may be backtrack somewhere...to get faster
+        //        //for the moment is still too inconsistent
+        //        OneDArraySolving(N);
+        //        //Stop Stopwatch
+        //        stopWatch.Stop();
 
 
-                queens.PrintBoard();
-                Console.WriteLine(queens);
+        //        queens.PrintBoard();
+        //        Console.WriteLine(queens);
 
-                //Print time
-                TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
-                        ts.Milliseconds / 10);
-                Console.WriteLine("RunTime: " + elapsedTime);
-            }
-        }
+        //        //Print time
+        //        TimeSpan ts = stopWatch.Elapsed;
+        //        string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+        //                ts.Milliseconds / 10);
+        //        Console.WriteLine("RunTime: " + elapsedTime);
+        //    }
+        //}
     }
 }

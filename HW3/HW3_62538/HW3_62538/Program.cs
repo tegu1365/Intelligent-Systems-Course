@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using System.Security.AccessControl;
 
 namespace HW3_62538
@@ -7,11 +8,11 @@ namespace HW3_62538
     {
         static List<(int Index, int Weight, int Value)> items = new List<(int Index, int Weight, int Value)>();
         static int maxBackpack, numberOfItems;
-        const double MUTATION_RATE = 0.45;
+        const double MUTATION_RATE = 0.2;
         const int MAX_GENERATIONS_WITHOUT_NEW_BEST = 500;
         const int MAX_GENERATIONS_REPEATS = 400;
-        static int sizeOfPopulation = 150;
-        //static List<(List<Backpack> Population, int max)> generations = new List<(List<Backpack> Population, int max)>();
+        static int sizeOfPopulation = 300;
+        static List<(List<Backpack> Population, int max)> generations = new List<(List<Backpack> Population, int max)>();
         static Random rnd = new Random();
         static List<int> gens=new List<int>();
 
@@ -42,6 +43,12 @@ namespace HW3_62538
                         }
                     }
                 }
+            }
+
+            public int this[int key]
+            {
+                get { return bits[key]; }
+                set { bits[key] = value; }
             }
 
             public Backpack()
@@ -87,8 +94,18 @@ namespace HW3_62538
         static int[] GenerateBits()
         {
             int[] bits = new int[numberOfItems];
-            bits = Enumerable.Repeat(0, bits.Length).Select(i => rnd.Next(0, 2)).ToArray();
-            return bits;
+            bits = Enumerable.Repeat(0, bits.Length).ToArray();//.Select(i => rnd.Next(0, 2)).ToArray();
+            Backpack newBackpack= new Backpack(bits);
+            for (int i = 0; i < bits.Length;i++)
+            {
+                int x = rnd.Next(0, 2);
+                newBackpack[i] = x;
+                if (newBackpack.Fitness() == 0)
+                {
+                    newBackpack[i] = 0;
+                }
+            }
+            return newBackpack.Bits;
         }
 
         static List<Backpack> Init(int size)
@@ -125,6 +142,14 @@ namespace HW3_62538
             //var rndPopulation = population.OrderBy(x => rnd.Next()).ToList();
             int[] index = Enumerable.Repeat(0, 4).Select(x => rnd.Next(sizeOfPopulation)).ToArray();
             List<Backpack> parents = new List<Backpack>();
+            for (int i = 0; i < 4; i++)
+            {
+                if (population[index[i]].Fitness() == 0)
+                {
+                    index[i] = rnd.Next(sizeOfPopulation);
+                    i = i - 1;
+                }
+            }
             //Console.WriteLine("RND population:");
             //PrintPopulation(rndPopulation);
             if (population[index[0]].Fitness() > population[index[1]].Fitness())
@@ -180,14 +205,19 @@ namespace HW3_62538
             {
                 bits[i] = parentB[i];
             }
+            
             return bits;
         }
 
         static List<Backpack> Crossover(List<Backpack> parents)
         {
             List<Backpack> children = new List<Backpack>();
-            children.Add(new Backpack(CreateChild(parents, 0)));
-            children.Add(new Backpack(CreateChild(parents, 1)));
+            Backpack child1 = new Backpack(CreateChild(parents, 0));
+            if(child1.Fitness()!=0) children.Add(child1);
+
+            Backpack child2 = new Backpack(CreateChild(parents, 1));
+
+            if (child2.Fitness() != 0) children.Add(child2);
             return children;
         }
 
@@ -195,15 +225,19 @@ namespace HW3_62538
         {
             foreach (var child in children)
             {
-                int[] childBits = child.Bits;
+                //int[] childBits = child.Bits;
                 for (int i = 0; i < child.Bits.Length; i++)
                 {
                     if (rnd.NextDouble() < MUTATION_RATE)
                     {
-                        childBits[i] = childBits[i] == 0 ? 1 : 0;
+                        child[i] = child[i] == 0 ? 1 : 0;
+                        if (child.Fitness() == 0)
+                        {
+                            child[i] = 0;
+                        }
                     }
                 }
-                child.Bits = childBits;
+                //child.Bits = childBits;
             }
         }
 
@@ -219,9 +253,10 @@ namespace HW3_62538
                 Mutation(children);
             }
 
-            nextGen.AddRange(children);
+            if(children.Count() > 0) nextGen.AddRange(children);
+
             population = population.OrderBy(x => rnd.Next()).ToList();
-            for (int i = 2; i < sizeOfPopulation; i++)
+            for (int i = children.Count(); i < sizeOfPopulation; i++)
             {
                 nextGen.Add(population[i]);
             }

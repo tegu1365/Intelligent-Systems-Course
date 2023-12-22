@@ -151,7 +151,7 @@ namespace HW1_62538_TeodoraPetkova
                 newBoard[row + 1, col] = 0;
                 Board tempBoard = new Board(newBoard, n * n, nullTile, "up");
                 list.Add(tempBoard);
-                //Console.WriteLine("UP:\n" + tempBoard);
+                Console.WriteLine("UP:\n" + tempBoard);
             }
             if (row - 1 != -1)
             {
@@ -162,7 +162,7 @@ namespace HW1_62538_TeodoraPetkova
                 newBoard[row - 1, col] = 0;
                 Board tempBoard = new Board(newBoard, n * n, nullTile, "down");
                 list.Add(tempBoard);
-                // Console.WriteLine("DOWN:\n" + tempBoard);
+                Console.WriteLine("DOWN:\n" + tempBoard);
             }
             if (col + 1 != n)
             {
@@ -173,7 +173,7 @@ namespace HW1_62538_TeodoraPetkova
                 newBoard[row, col + 1] = 0;
                 Board tempBoard = new Board(newBoard, n * n, nullTile, "left");
                 list.Add(tempBoard);
-                //Console.WriteLine("LEFT: \n" + tempBoard);
+                Console.WriteLine("LEFT: \n" + tempBoard);
             }
             if (col - 1 != -1)
             {
@@ -184,7 +184,7 @@ namespace HW1_62538_TeodoraPetkova
                 newBoard[row, col - 1] = 0;
                 Board tempBoard = new Board(newBoard, n * n, nullTile, "right");
                 list.Add(tempBoard);
-                //Console.WriteLine("RIGHT:\n" + tempBoard);
+                Console.WriteLine("RIGHT:\n" + tempBoard);
             }
             return list;
         }
@@ -361,12 +361,15 @@ namespace HW1_62538_TeodoraPetkova
             }
 
             int estimate = current.Moves + current.Dist;
+
             if (estimate > threshold)
             {
                 return estimate;
             }
+
             int min = int.MaxValue;
             List<Board> versions = current.Board.Neighbors();
+
             foreach (Board b in versions)
             {
                 int t = IDA(new Node(b, current.Moves + 1, current), threshold);
@@ -427,8 +430,8 @@ namespace HW1_62538_TeodoraPetkova
                 }
             }
             //Start stopwatch
-            //Stopwatch stopWatch = new Stopwatch();
-            //stopWatch.Start();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             //creating board
             Board board = new Board(inputBoard, N, inpNullTile);
             //Console.WriteLine("_______________________________");
@@ -439,15 +442,15 @@ namespace HW1_62538_TeodoraPetkova
 
                 SolverIDA solver = new SolverIDA(board);
                 //Stop Stopwatch
-                // stopWatch.Stop();
+                stopWatch.Stop();
 
                 Console.WriteLine(solver.Moves);
                 solver.Path();
                 //Print time
-                //TimeSpan ts = stopWatch.Elapsed;
-                // string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
-                //         ts.Milliseconds / 10);
-                //Console.WriteLine("RunTime: " + elapsedTime);
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}.{1:00}", ts.Seconds,
+                        ts.Milliseconds / 10);
+                Console.WriteLine("RunTime: " + elapsedTime);
             }
             else
             {

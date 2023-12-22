@@ -65,7 +65,7 @@ class NaiveBayesClassifier:
 
 
 # 10-fold
-k_fold = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+k_fold = StratifiedKFold(n_splits=10, shuffle=True) # , random_state=42
 accuracies = []
 
 for train_index, test_index in k_fold.split(attributes, classes):
